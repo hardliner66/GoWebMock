@@ -1,0 +1,23 @@
+{
+    "port": 80,
+    "beautify": true,
+    "staticResponses": [
+        {
+            "path": "/autoexec",
+			"contentType": "application/json; charset=utf-8",
+            "file": "./autoexec.json",
+            "response": ""
+        }
+    ],
+    "dynamicResponses": [
+        {
+            "path": "/sendIpReverse",
+            "handler": "./script/sendIpReverse.js",
+			"contentType": "application/json; charset=utf-8",
+            "config": {
+                "length": 9
+            },
+            "storage": {}
+        }
+    ]
+}
