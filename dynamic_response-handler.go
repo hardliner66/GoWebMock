@@ -1,9 +1,14 @@
 package main
 
 import (
+	"log"
+	//	"fmt"
+	"encoding/json"
+
 	"github.com/robertkrimen/otto"
 	"io/ioutil"
 	"net/http"
+	//	"reflect"
 )
 
 func (g *DynamicResponse) GetPath() string {
@@ -13,6 +18,17 @@ func (g *DynamicResponse) GetPath() string {
 func (g *DynamicResponse) WebOptionsHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Header().Add("Access-Control-Allow-Origin", "*")
+}
+
+func Clone(a, b interface{}) {
+	val, err := json.Marshal(a)
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = json.Unmarshal(val, b)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func (g *DynamicResponse) WebPostHandler(w http.ResponseWriter, r *http.Request) {
@@ -50,10 +66,18 @@ func (g *DynamicResponse) WebPostHandler(w http.ResponseWriter, r *http.Request)
 			return val
 		})
 
+		w.Header().Add("content_type", g.ContentType)
+
+		header := make(map[string]string)
+
+		config := make(map[string]interface{})
+
+		Clone(g.GlobalConfig, &config)
+
 		g.vm.Set("request", r)
-		g.vm.Set("config", g.GlobalConfig)
+		g.vm.Set("config", config)
 		g.vm.Set("storage", g.Storage)
-		g.vm.Set("content_type", g.ContentType)
+		g.vm.Set("header", header)
 
 		val, err := g.vm.Run(string(dat))
 
@@ -69,10 +93,13 @@ func (g *DynamicResponse) WebPostHandler(w http.ResponseWriter, r *http.Request)
 				return
 			} else {
 				response = val
-				g.Storage, err = g.vm.Get("storage")
-				ct, _ := g.vm.Get("content_type")
-				ctStr, _ := ct.ToString()
-				w.Header().Add("content-type", ctStr)
+				for s := range header {
+					if len(w.Header().Get(s)) > 0 {
+						w.Header().Set(s, header[s])
+					} else {
+						w.Header().Add(s, header[s])
+					}
+				}
 			}
 		}
 
