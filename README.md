@@ -19,13 +19,13 @@ I hope someone has good use for this server.
 Everything is configured through a config json. If no config file is specified (-cfg) then the server tries to load autoexec.json in the same directory.
 
 There are two types of responses. Static and dynamic.
-Static responses serve either a string or a file from a given path
-Dynamic responses execute javascript to build the response.
+- Static responses serve either a string or a file from a given path
+- Dynamic responses execute javascript to build the response.
 
 Inside the javascript, there are four predefined variables:
-request: Holds the current request object.
-config:  Holds the config, which can be defined in the autoexec.json
-storage: A simple javascript storage, which persists data between calls. (the storage gets cleared when the server is restarted)
-header:  Here you can define the headers for the response
+- request: Holds the current request object.
+- config:  Holds the config, which can be defined in the autoexec.json
+- storage: A simple javascript storage, which persists data between calls. (the storage gets cleared when the server is restarted)
+- header:  Here you can define the headers for the response
 
 Everything located in the static folder, will be served like a webserver would.
