@@ -1,2 +1,2 @@
 #!/bin/sh
-goxc -max-processors=2 -include=README*,script/*,static/*,autoexec.json
+goxc -max-processors=$(grep -c ^processor /proc/cpuinfo) -include=README*,script/*,static/*,autoexec.json
