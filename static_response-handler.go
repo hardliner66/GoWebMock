@@ -9,11 +9,6 @@ func (g *StaticResponse) GetPath() string {
 	return g.Path
 }
 
-func (g *StaticResponse) WebOptionsHandler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-	w.Header().Add("Access-Control-Allow-Origin", "*")
-}
-
 func (g *StaticResponse) WebPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()

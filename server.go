@@ -2,27 +2,26 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
-	"net"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 func main() {
 
-	var cfg = flag.String("cfg", "./autoexec.json", "the config file")
+	var config_path = flag.String("cfg", "./autoexec.json", "the config file")
 	flag.Parse()
 
 	var config Config
 
-	dat, err := ioutil.ReadFile(*cfg)
+	config_data, err := ioutil.ReadFile(*config_path)
 
 	if err == nil {
-		err = json.Unmarshal(dat, &config)
+		err = json.Unmarshal(config_data, &config)
 	} else {
 		fmt.Println(err)
 		fmt.Println("Using default config...")
@@ -67,14 +66,24 @@ func main() {
 			w.Header().Add("content-type", "application/json; charset=utf-8")
 			// Return encoded entry.
 			w.WriteHeader(http.StatusOK)
+
+			if !strings.HasPrefix(r.RemoteAddr, "127.0.0.1") {
+				if strings.Contains(r.RemoteAddr, ":") {
+					ip = strings.Split(r.RemoteAddr, ":")[0]
+				} else {
+					ip = r.RemoteAddr
+				}
+			}
 			w.Write([]byte(ip))
 		})
 
+		// add static responses
 		for sresp := range config.StaticResponses {
 			sr := NewStaticResponse(config.StaticResponses[sresp])
 			http.HandleFunc(sr.GetPath(), sr.WebPostHandler)
 		}
 
+		// add dynamic responses
 		for dresp := range config.DynamicResponses {
 			if len(config.DynamicResponses[dresp].Handler) > 0 {
 				_, err := ioutil.ReadFile(config.DynamicResponses[dresp].Handler)
@@ -94,41 +103,4 @@ func main() {
 
 		log.Fatal(http.ListenAndServe(":"+strconv.Itoa(config.Port), nil))
 	}
-}
-
-func externalIP() (string, error) {
-	ifaces, err := net.Interfaces()
-	if err != nil {
-		return "", err
-	}
-	for _, iface := range ifaces {
-		if iface.Flags&net.FlagUp == 0 {
-			continue // interface down
-		}
-		if iface.Flags&net.FlagLoopback != 0 {
-			continue // loopback interface
-		}
-		addrs, err := iface.Addrs()
-		if err != nil {
-			return "", err
-		}
-		for _, addr := range addrs {
-			var ip net.IP
-			switch v := addr.(type) {
-			case *net.IPNet:
-				ip = v.IP
-			case *net.IPAddr:
-				ip = v.IP
-			}
-			if ip == nil || ip.IsLoopback() {
-				continue
-			}
-			ip = ip.To4()
-			if ip == nil {
-				continue // not an ipv4 address
-			}
-			return ip.String(), nil
-		}
-	}
-	return "", errors.New("are you connected to the network?")
 }

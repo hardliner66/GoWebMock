@@ -1,23 +1,16 @@
 package main
 
 import (
-	"log"
-	//	"fmt"
 	"encoding/json"
+	"log"
 
 	"github.com/robertkrimen/otto"
 	"io/ioutil"
 	"net/http"
-	//	"reflect"
 )
 
 func (g *DynamicResponse) GetPath() string {
 	return g.Path
-}
-
-func (g *DynamicResponse) WebOptionsHandler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-	w.Header().Add("Access-Control-Allow-Origin", "*")
 }
 
 func Clone(a, b interface{}) {
