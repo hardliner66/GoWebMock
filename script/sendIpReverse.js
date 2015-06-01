@@ -1,8 +1,18 @@
 (function() {
 	storage.count = storage.count || 0;
-	var ip = externalIp();
-	var bytes = ip.split('.');
-	var reverted = "";
+	var ip = request.RemoteAddr;
+	
+	if (ip.indexOf(":") > -1) {
+		ip = ip.split(':')[0];
+	}
+	
+	if (ip === "127.0.0.1") {
+		ip = externalIp()
+	}
+	
+	var bytes = ip.split('.'),
+		reverted = "";
+	
 	for (var i = 3; i >= 0; i--) {
 		reverted += bytes[i];
 	}

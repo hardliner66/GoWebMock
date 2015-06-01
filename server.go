@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+
+	_ "net/http/pprof"
 )
 
 func main() {
