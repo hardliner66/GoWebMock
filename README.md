@@ -27,5 +27,6 @@ Inside the javascript, there are four predefined variables:
 - config:  Holds the config, which can be defined in the autoexec.json
 - storage: A simple javascript storage, which persists data between calls. (the storage gets cleared when the server is restarted)
 - header:  Here you can define the headers for the response
+- httpStatusCode: the response code, which should be returned
 
 Everything located in the static folder, will be served like a webserver would.
