@@ -37,6 +37,8 @@ func (g *DynamicResponse) WebPostHandler(w http.ResponseWriter, r *http.Request)
 	}
 
 	var response string
+	var httpStatusCode uint
+	httpStatusCode = http.StatusOK
 
 	dat, err := ioutil.ReadFile(g.Handler)
 
@@ -59,6 +61,16 @@ func (g *DynamicResponse) WebPostHandler(w http.ResponseWriter, r *http.Request)
 			return val
 		})
 
+		g.vm.Set("getRandomErrorCode", func(call otto.FunctionCall) otto.Value {
+			code := GetErrorCode()
+			val, err := g.vm.ToValue(code)
+			if err != nil {
+				val, _ := g.vm.ToValue(HttpErrorCode{701, "Meh"})
+				return val
+			}
+			return val
+		})
+
 		w.Header().Add("content_type", g.ContentType)
 
 		header := make(map[string]string)
@@ -71,6 +83,7 @@ func (g *DynamicResponse) WebPostHandler(w http.ResponseWriter, r *http.Request)
 		g.vm.Set("config", config)
 		g.vm.Set("storage", g.Storage)
 		g.vm.Set("header", header)
+		g.vm.Set("httpStatusCode", &httpStatusCode)
 
 		val, err := g.vm.Run(string(dat))
 
@@ -97,6 +110,6 @@ func (g *DynamicResponse) WebPostHandler(w http.ResponseWriter, r *http.Request)
 		}
 
 	}
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(int(httpStatusCode))
 	w.Write([]byte(response))
 }
