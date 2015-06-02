@@ -23,8 +23,6 @@
 		
 		var response = { ip: reverted.substring(0, config.length), count: storage.count++, randomError: getRandomErrorCode()};
 		
-		httpStatusCode = 200;
-		
 		return JSON.stringify(response);
 	} catch (e) {
 		httpStatusCode = 500
