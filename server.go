@@ -7,13 +7,17 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
+	"sync"
 
 	_ "net/http/pprof"
 )
 
 func main() {
+
+	var wg sync.WaitGroup
 
 	var config_path = flag.String("cfg", "./autoexec.json", "the config file")
 	flag.Parse()
@@ -38,13 +42,29 @@ func main() {
 			config.Port = 80
 		}
 
+		if config.SSLPort == 0 {
+			config.SSLPort = 443
+		}
+
+		if _, err := os.Stat(config.PrivateKeyPath); os.IsNotExist(err) {
+			fmt.Println("Private key not found at: " + config.PrivateKeyPath)
+			config.SSLPort = -1
+		}
+
+		if _, err := os.Stat(config.PublicKeyPath); os.IsNotExist(err) {
+			fmt.Println("Public key not found at: " + config.PrivateKeyPath)
+			config.SSLPort = -1
+		}
+
 		configJson, err := json.MarshalIndent(config, "", "    ")
 		if err == nil {
 			fmt.Println("Config:")
 			fmt.Println(string(configJson))
 		}
 
-		fmt.Println("Serving on port: " + strconv.Itoa(config.Port))
+		if config.Port < 0 && config.SSLPort < 0 {
+			config.Port = 80
+		}
 
 		http.Handle("/", http.FileServer(http.Dir("static")))
 
@@ -103,6 +123,24 @@ func main() {
 			}
 		}
 
-		log.Fatal(http.ListenAndServe(":"+strconv.Itoa(config.Port), nil))
+		if config.SSLPort > 0 {
+			fmt.Println("Serving HTTPS on port: " + strconv.Itoa(config.SSLPort))
+			wg.Add(1)
+			go func() {
+				log.Fatal(http.ListenAndServeTLS(":"+strconv.Itoa(config.SSLPort), config.PublicKeyPath, config.PrivateKeyPath, nil))
+				wg.Done()
+			}()
+		}
+
+		if config.Port > 0 {
+			fmt.Println("Serving HTTP on port: " + strconv.Itoa(config.Port))
+			wg.Add(1)
+			go func() {
+				log.Fatal(http.ListenAndServe(":"+strconv.Itoa(config.Port), nil))
+				wg.Done()
+			}()
+		}
+
+		wg.Wait()
 	}
 }

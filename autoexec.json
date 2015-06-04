@@ -1,5 +1,7 @@
 {
     "port": 80,
+	"privateKeyPath": "./keys/server.key",
+	"publicKeyPath": "./keys/server.crt",
     "staticResponses": [
         {
             "path": "/autoexec",

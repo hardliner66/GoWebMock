@@ -23,6 +23,9 @@ type DynamicResponse struct {
 
 type Config struct {
 	Port             int               `json:"port"`
+	SSLPort          int               `json:"sslPort"`
+	PublicKeyPath    string            `json:"publicKeyPath"`
+	PrivateKeyPath   string            `json:"privateKeyPath"`
 	Beautify         bool              `json:"beautify"`
 	StaticResponses  []StaticResponse  `json:"staticResponses"`
 	DynamicResponses []DynamicResponse `json:"dynamicResponses"`
