@@ -1,5 +1,13 @@
 (function() {
 	storage.count = storage.count || 0;
+	GlobalCount = GlobalStorage(function() {
+		data.count = data.count || 0;
+		data.count++;
+		return data.count;
+	});
+	
+	console.log('GlobalCount: ' + GlobalCount);
+	
 	try
 	{
 		var ip = request.RemoteAddr;
@@ -19,9 +27,9 @@
 			reverted += bytes[i];
 		}
 		
-		console.log(JSON.stringify(request));
+//		console.log(JSON.stringify(request));
 		
-		var response = { ip: reverted.substring(0, config.length), count: storage.count++, randomError: getRandomErrorCode()};
+		var response = { ip: reverted.substring(0, config.length), count: ++storage.count, randomError: getRandomErrorCode()};
 		
 		return JSON.stringify(response);
 	} catch (e) {

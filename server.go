@@ -8,6 +8,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
@@ -15,12 +17,43 @@ import (
 	_ "net/http/pprof"
 )
 
+var GlobalStorage map[string]interface{}
+var StorageMutex *sync.Mutex
+var Closing bool
+
+func cleanup() {
+	if !Closing {
+		Closing = true
+
+		b, err := json.Marshal(GlobalStorage)
+		if err == nil {
+			os.Mkdir("."+string(filepath.Separator)+"__data", 0644)
+			ioutil.WriteFile("__data/global.json", b, 0644)
+		}
+	}
+}
+
 func main() {
+	Closing = false
+
+	StorageMutex = &sync.Mutex{}
 
 	var wg sync.WaitGroup
 
 	var config_path = flag.String("cfg", "./autoexec.json", "the config file")
 	flag.Parse()
+
+	b, err := ioutil.ReadFile("__data/global.json")
+	if err == nil {
+		err = json.Unmarshal(b, &GlobalStorage)
+		if err != nil {
+			fmt.Println(err)
+			GlobalStorage = make(map[string]interface{})
+		}
+	} else {
+		fmt.Println(err)
+		GlobalStorage = make(map[string]interface{})
+	}
 
 	var config Config
 
@@ -122,6 +155,19 @@ func main() {
 				fmt.Println(config.DynamicResponses[dresp])
 			}
 		}
+
+		// Cleanup on Ctrl-C and on Close
+		defer cleanup()
+		c := make(chan os.Signal, 1)
+		signal.Notify(c, os.Interrupt)
+		go func() {
+			for sig := range c {
+				if os.Interrupt == sig || os.Kill == sig {
+					cleanup()
+					os.Exit(0)
+				}
+			}
+		}()
 
 		if config.SSLPort > 0 {
 			fmt.Println("Serving HTTPS on port: " + strconv.Itoa(config.SSLPort))

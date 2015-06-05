@@ -71,6 +71,23 @@ func (g *DynamicResponse) WebPostHandler(w http.ResponseWriter, r *http.Request)
 			return val
 		})
 
+		g.vm.Set("GlobalStorage", func(call otto.FunctionCall) (ret otto.Value) {
+			StorageMutex.Lock()
+			defer StorageMutex.Unlock()
+			if len(call.ArgumentList) == 0 {
+				ret, _ = g.vm.ToValue(nil)
+			} else {
+				g.vm.Set("data", GlobalStorage)
+				args := call.ArgumentList[1:]
+				ret, err = call.ArgumentList[0].Call(call.This, args)
+				if err != nil {
+					ret, _ = g.vm.ToValue(err.Error())
+				}
+				g.vm.Set("data", nil)
+			}
+			return
+		})
+
 		w.Header().Add("content_type", g.ContentType)
 
 		header := make(map[string]string)
