@@ -36,3 +36,14 @@ To persist data, you can use the GlobalStorage function.
 - The data object is persisted to disc when the process terminates and loaded when the process starts.
 - The data object is only accessible through the GlobalStorage function, because of the mutex, to prevent race conditions.
 - The GlobalStorage functions returns the return value of the callback.
+
+e.g.:
+```
+var globalCount = GlobalStorage(function() {
+	data.count = data.count | 0; // Initialize variable, if it doesn't exist
+	data.count++;
+	return data.count;
+});
+
+console.log("globalCount: " + globalCount);
+```
