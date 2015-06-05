@@ -77,12 +77,16 @@ func (g *DynamicResponse) WebPostHandler(w http.ResponseWriter, r *http.Request)
 			if len(call.ArgumentList) == 0 {
 				ret, _ = g.vm.ToValue(nil)
 			} else {
-				g.vm.Set("data", GlobalStorage)
+				data := make(map[string]interface{})
+
+				Clone(&GlobalStorage, &data)
+				g.vm.Set("data", data)
 				args := call.ArgumentList[1:]
 				ret, err = call.ArgumentList[0].Call(call.This, args)
 				if err != nil {
 					ret, _ = g.vm.ToValue(err.Error())
 				}
+				Clone(&data, &GlobalStorage)
 				g.vm.Set("data", nil)
 			}
 			return
