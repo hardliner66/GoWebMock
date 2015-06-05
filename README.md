@@ -22,7 +22,7 @@ There are two types of responses. Static and dynamic.
 - Static responses serve either a string or a file from a given path
 - Dynamic responses execute javascript to build the response.
 
-Inside the javascript, there are four predefined variables:
+Inside the javascript, there are the following predefined variables:
 - request: Holds the current request object.
 - config:  Holds the config, which can be defined in the autoexec.json
 - storage: A simple javascript storage, which persists data between calls. (the storage gets cleared when the server is restarted)
@@ -30,3 +30,9 @@ Inside the javascript, there are four predefined variables:
 - httpStatusCode: the response code, which should be returned
 
 Everything located in the static folder, will be served like a webserver would.
+
+To persist data, you can use the GlobalStorage function.
+- This function takes a callback. Inside this callback you can access a global object called "data", in which the everything is stored.
+- The data object is persisted to disc when the process terminates and loaded when the process starts.
+- The data object is only accessible through the GlobalStorage function, because of the mutex, to prevent race conditions.
+- The GlobalStorage functions returns the return value of the callback.
