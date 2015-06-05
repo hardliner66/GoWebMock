@@ -22,6 +22,8 @@ There are two types of responses. Static and dynamic.
 - Static responses serve either a string or a file from a given path
 - Dynamic responses execute javascript to build the response.
 
+Every time a dynamic response gets called, the underlying javascript gets reloaded. So if you want to quickly test something, rewrite the handler and send the request again. There is no need to restart the server.
+
 Inside the javascript, there are the following predefined variables:
 - request: Holds the current request object.
 - config:  Holds the config, which can be defined in the autoexec.json
