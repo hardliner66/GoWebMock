@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"sync"
@@ -41,7 +42,13 @@ func main() {
 	var wg sync.WaitGroup
 
 	var config_path = flag.String("cfg", "./autoexec.json", "the config file")
+	var numCPU = flag.Int("cpus", runtime.NumCPU(), "the number of cpus to use")
+
 	flag.Parse()
+
+	runtime.GOMAXPROCS(*numCPU)
+
+	fmt.Println("Running on " + strconv.Itoa(*numCPU) + " CPUs!")
 
 	b, err := ioutil.ReadFile("__data/global.json")
 	if err == nil {
