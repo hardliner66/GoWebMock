@@ -99,6 +99,12 @@ func (g *DynamicResponse) WebPostHandler(w http.ResponseWriter, r *http.Request)
 		config := make(map[string]interface{})
 
 		Clone(g.GlobalConfig, &config)
+		
+		body, err := ioutil.ReadAll(r.Body)
+		
+		if err == nil {
+			g.vm.Set("body", string(body))
+		}
 
 		g.vm.Set("request", r)
 		g.vm.Set("config", config)
