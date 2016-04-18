@@ -26,6 +26,7 @@ Every time a dynamic response gets called, the underlying javascript gets reload
 
 Inside the javascript, there are the following predefined variables:
 - request: Holds the current request object.
+- body: Holds the body of the request (if there is one)
 - config:  Holds the config, which can be defined in the autoexec.json
 - storage: A simple javascript storage, which persists data between calls. (the storage gets cleared when the server is restarted)
 - header:  Here you can define the headers for the response
